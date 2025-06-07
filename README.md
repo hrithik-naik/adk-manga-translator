@@ -107,3 +107,13 @@ https://preview.redd.it/7sqv62lyhzf11.png?width=640&crop=smart&auto=webp&s=79061
 |------------------------------------------------------------|-----------------------------------------------------------|
 | ![Input Panel](DEMOonline.png)    | ![Output Panel](DEMOoffline.png)        |
 
+## ⚠️ Disclaimer
+
+This project was created mainly for fun and experimentation. While it leverages Google Gemini and custom tools—such as a CNN-based segmentation model trained using YOLOv11 for manga cleaning and preprocessing—the translations and outputs may occasionally contain errors or inaccuracies.
+
+The system uses **4 custom tools** to handle various stages of the manga translation pipeline. If you encounter buggy or unexpected output, try rerunning the query or adjusting the prompt for better results.
+
+Feel free to use this project, experiment with it, and contribute improvements!
+
+Thank you for trying out the ADK Manga Translator!  
+Happy translating! 🎉
