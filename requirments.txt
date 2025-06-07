@@ -1,0 +1,5 @@
+google-adk
+numpy
+ultralytics
+opencv-python
+google-generativeai

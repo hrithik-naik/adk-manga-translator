@@ -1,0 +1,185 @@
+rom ultralytics import YOLO
+import cv2
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+import os
+
+def translate_manga(image_path, translations, output_path='translated_manga.png'):
+    """
+    Complete manga translation pipeline - detects text, whites it out, and typesets translations
+
+    Args:
+        image_path: Path to input manga image
+        translations: List of translated texts
+        output_path: Path where translated image will be saved
+
+    Returns:
+        str: Path to the saved translated image
+    """
+    # Load model and image
+    model = YOLO("MangaTL/runs/segment/train8/weights/best.pt")
+    image = cv2.imread(image_path)
+
+    # Run inference once
+    results = model(image)
+    masks = results[0].masks
+    boxes = results[0].boxes
+
+    if masks is None or boxes is None:
+        # No text detected, save original image
+        cv2.imwrite(output_path, image)
+        return os.path.abspath(output_path)
+
+    # Extract text regions
+    text_regions = []
+    for i in range(len(masks.data)):
+        mask = masks.data[i].cpu().numpy()
+        mask_resized = cv2.resize(mask, (image.shape[1], image.shape[0]))
+        binary_mask = (mask_resized > 0.5).astype(np.uint8)
+
+        box = boxes.xyxy[i].cpu().numpy()
+        x1, y1, x2, y2 = map(int, box)
+
+        text_regions.append({
+            'mask': binary_mask,
+            'bbox': (x1, y1, x2, y2),
+            'center': ((x1 + x2) // 2, (y1 + y2) // 2)
+        })
+
+    # Sort regions by reading order (top to bottom, left to right)
+    text_regions.sort(key=lambda r: (r['center'][1], r['center'][0]))
+
+    # Convert to PIL for text rendering
+    pil_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+    # Get font path based on OS
+    font_paths = [
+        "/System/Library/Fonts/Arial.ttf",  # macOS
+        "C:/Windows/Fonts/arial.ttf",       # Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"  # Linux
+    ]
+
+    font_path = None
+    for path in font_paths:
+        if os.path.exists(path):
+            font_path = path
+            break
+
+    # Process each text region
+    for i, region in enumerate(text_regions):
+        if i >= len(translations) or not translations[i].strip():
+            continue
+
+        # White out original text
+        mask = region['mask']
+        mask_3ch = np.stack([mask] * 3, axis=-1)
+        image_array = np.array(pil_image)
+        image_array = np.where(mask_3ch == 1, 255, image_array)
+        pil_image = Image.fromarray(image_array)
+
+        # Typeset translation
+        _typeset_text(pil_image, translations[i], region['bbox'], font_path)
+
+    # Save final image
+    pil_image.save(output_path, quality=95, dpi=(300, 300))
+    return os.path.abspath(output_path)
+
+def _typeset_text(image, text, bbox, font_path):
+    """Helper function to typeset text in a region"""
+    draw = ImageDraw.Draw(image)
+    x1, y1, x2, y2 = bbox
+    region_width = x2 - x1
+    region_height = y2 - y1
+
+    # Find optimal font size
+    font_size = _find_optimal_font_size(text, region_width, region_height, font_path)
+
+    # Load font
+    try:
+        font = ImageFont.truetype(font_path, font_size) if font_path else ImageFont.load_default()
+    except:
+        font = ImageFont.load_default()
+
+    # Wrap text into lines
+    lines = _wrap_text(text, region_width, font, draw)
+
+    # Calculate text positioning
+    line_height = draw.textbbox((0, 0), "Ag", font=font)[3]
+    total_height = len(lines) * line_height * 1.2
+    start_y = y1 + (region_height - total_height) // 2
+
+    # Draw text with outline
+    outline_width = max(1, font_size // 20)
+
+    for j, line in enumerate(lines):
+        text_width = draw.textbbox((0, 0), line, font=font)[2]
+        text_x = x1 + (region_width - text_width) // 2
+        text_y = start_y + j * line_height * 1.2
+
+        # Draw white outline
+        for dx in [-outline_width, 0, outline_width]:
+            for dy in [-outline_width, 0, outline_width]:
+                if dx != 0 or dy != 0:
+                    draw.text((text_x + dx, text_y + dy), line, font=font, fill='white')
+
+        # Draw main text
+        draw.text((text_x, text_y), line, font=font, fill='black')
+
+def _find_optimal_font_size(text, width, height, font_path, min_size=12, max_size=60):
+    """Find the largest font size that fits the text in the given dimensions"""
+    for size in range(max_size, min_size - 1, -1):
+        try:
+            font = ImageFont.truetype(font_path, size) if font_path else ImageFont.load_default()
+        except:
+            font = ImageFont.load_default()
+
+        temp_img = Image.new('RGB', (width, height))
+        temp_draw = ImageDraw.Draw(temp_img)
+
+        lines = _wrap_text(text, width, font, temp_draw)
+        line_height = temp_draw.textbbox((0, 0), "Ag", font=font)[3]
+        total_height = len(lines) * line_height * 1.2
+
+        if total_height <= height * 0.9:
+            return size
+
+    return min_size
+
+def _wrap_text(text, width, font, draw):
+    """Wrap text to fit within specified width"""
+    words = text.split()
+    lines = []
+    current_line = []
+
+    for word in words:
+        test_line = ' '.join(current_line + [word])
+        text_width = draw.textbbox((0, 0), test_line, font=font)[2]
+
+        if text_width <= width * 0.9:
+            current_line.append(word)
+        else:
+            if current_line:
+                lines.append(' '.join(current_line))
+                current_line = [word]
+            else:
+                lines.append(word)
+
+    if current_line:
+        lines.append(' '.join(current_line))
+
+    return lines
+
+# Usage example
+if __name__ == "__main__":
+    image_path = 'MangaTL/5.png'
+    translations = [
+        "Alright! Let's go!!!!",
+        "I'm going to be",
+        "the Pirate King!!!",
+        "Every volume, he ahead of Nakami included Ship between Han reaches and sails the sea",
+        "And so, the great journey began!"
+    ]
+
+    # Translate and save
+    output_file = translate_manga(image_path, translations, 'translated_manga.png')
+    print(f"Translated manga saved to: {output_file}")
