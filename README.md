@@ -115,5 +115,6 @@ The system uses **4 custom tools** to handle various stages of the manga transla
 
 Feel free to use this project, experiment with it, and contribute improvements!
 
+
 Thank you for trying out the ADK Manga Translator!  
 Happy translating! 🎉
