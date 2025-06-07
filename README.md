@@ -28,6 +28,22 @@ This setup uses a **manager agent** to orchestrate all the sub-agents in a struc
 
 
 ---
+## 📝 Examples
+
+### Example 1
+
+| Input (Japanese Panel)                                     | Output (Translated Panel)                                 |
+|------------------------------------------------------------|-----------------------------------------------------------|
+| ![Input Panel](OnlineDownloads/7.png) | ![Output Panel](output/translated_manga_12457.png)        |
+
+---
+
+### Example 2
+
+| Input (Japanese Panel)                                     | Output (Translated Panel)                                 |
+|------------------------------------------------------------|-----------------------------------------------------------|
+| ![Input Panel](OnlineDownloads/downloaded_12111_YAjqu.png) | ![Output Panel](output/translated_manga_48195.png)        |
+
 
 ## 🚀 How It Works
 
