@@ -1,6 +1,6 @@
 # 🈺 ADK Manga Translator
 
-A multi-agent, multimodal pipeline built using Google's **Agent Development Kit (ADK)** to translate Japanese manga panels into English. This system is modular, autonomous, and capable of handling the full pipeline from image preprocessing to final language translation and proofreading.
+A multi-agent, multimodal pipeline built using Google's **Agent Development Kit (ADK)** to translate Japanese manga panels and Korean manwha into English. This system is modular, autonomous, and capable of handling the full pipeline from image preprocessing to final language translation and proofreading.
 
 ---
 
@@ -45,6 +45,61 @@ This setup uses a **manager agent** to orchestrate all the sub-agents in a struc
 | ![Input Panel](OnlineDownloads/downloaded_12111_YAjqu.png) | ![Output Panel](output/translated_manga_48195.png)        |
 
 
-## 🚀 How It Works
+## Installation:
 
-### 🔗 Input Format
+
+This guide helps you set up the **ADK Manga Translator** project locally.
+
+---
+
+## Prerequisites
+
+- Python 3.10 or higher
+- Git
+- [Google ADK](https://developers.google.com/ai) properly configured (API keys, etc.)
+- Other dependencies listed in `requirements.txt`
+
+---
+
+## Steps
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/hrithik-naik/adk-manga-translator.git
+cd adk-manga-translator
+```
+## 2. Create a venv 
+
+```bash
+python -m venv venv
+# Windows
+.\venv\Scripts\activate
+# Linux/Mac
+source venv/bin/activate
+```
+## 3. Install Dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+## 4. Setup environment variables :
+Go to the `manager` folder and inside the `.env` file. Then, paste your API key obtained from [Google AI Studio](https://aistudio.google.com/prompts/new_chat) into the `.env` file.
+```bash
+
+GOOGLE_ADK_API_KEY=your_api_key_here
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+```
+## 5. Running the project:
+Run the command inside ur terminal
+```bash
+adk web 
+```
+and in the top left drop down choose manager as your agent.
+## 6. Query Format:
+You can give any online links or even offline links.  
+**Example:**  
+https://preview.redd.it/7sqv62lyhzf11.png?width=640&crop=smart&auto=webp&s=790619776bbc8e9126cf3ce800f0d654655c0409
+
+
+
