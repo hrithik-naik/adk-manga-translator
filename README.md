@@ -101,5 +101,9 @@ You can give any online links or even offline links.
 **Example:**  
 https://preview.redd.it/7sqv62lyhzf11.png?width=640&crop=smart&auto=webp&s=790619776bbc8e9126cf3ce800f0d654655c0409
 
+### Example 
 
+|    Online Link                                 | Offline Link                                 |
+|------------------------------------------------------------|-----------------------------------------------------------|
+| ![Input Panel](DEMOonline.png)    | ![Output Panel](DEMOoffline.png)        |
 
